@@ -21,6 +21,7 @@ type Field struct {
 }
 
 type Model struct {
+	Name   string
 	Fields []Field
 }
 

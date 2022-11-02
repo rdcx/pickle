@@ -17,7 +17,7 @@ func Function(w http.ResponseWriter, r *http.Request) {
 func main() {
 
 	r := mux.NewRouter()
-	r.HandleFunc("/", Function).Methods("GET")
+	r.HandleFunc("/", Function)
 
 	log.Fatal(http.ListenAndServe(":80", r))
 }

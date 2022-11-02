@@ -1,15 +1,26 @@
 package main
 
 import (
-	{{ if .HasRedis }} "context" {{ end }}
+	{{ if .HasRedis }}"context"{{ end }}
 	"encoding/json"
 	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
 
-	{{ if .HasRedis }} "github.com/go-redis/redis/v9" {{ end }}
+	{{ if .HasModel }}"github.com/google/uuid"{{ end }}
+	{{ if .HasRedis }}"github.com/go-redis/redis/v9"{{ end }}
 )
+
+{{ if .HasModel }}
+
+type {{ .Model.Name }} struct {
+	ID string `json:"id"`
+	{{ range .Model.Fields }}
+	{{ .Name }} {{ .Type }} `json:"{{ .Name }}"`{{ end }}
+}
+
+{{ end }}
 
 {{ if .HasRedis }}
 var ctx = context.Background()
@@ -18,6 +29,7 @@ var rdb = redis.NewClient(&redis.Options{
 	Password: "{{ .Redis.Password }}", // no password set
 	DB:       0,  // use default DB
 })
+
 {{ end }}
 
 func Function(w http.ResponseWriter, r *http.Request) {
@@ -30,6 +42,28 @@ func Function(w http.ResponseWriter, r *http.Request) {
 	} else {
 		json.NewEncoder(w).Encode(val)
 	}
+	{{ else if and (.HasRedis) (eq .Action "store") }}
+	
+	{{ if .HasModel }}
+	var {{ .Model.Name | lower }} {{ .Model.Name }}
+	json.NewDecoder(r.Body).Decode(&{{ .Model.Name | lower }})
+	{{ end }}
+
+	{{ if .HasModel }}
+	{{ .Model.Name | lower }}.ID = uuid.NewString()
+	err := rdb.Set(ctx, {{ .Model.Name | lower }}.ID,{{ .Model.Name | lower }}, 0).Err()
+    if err != nil {
+        panic(err)
+    }
+	json.NewEncoder(w).Encode({{ .Model.Name | lower }})
+	{{ else }}
+	err := rdb.Set(ctx, id, "value", 0).Err()
+    if err != nil {
+        panic(err)
+    }
+	{{ end }}
+
+	
 	{{ else }}
 
 	json.NewEncoder(w).Encode("Hello world")
@@ -40,7 +74,7 @@ func Function(w http.ResponseWriter, r *http.Request) {
 func main() {
 
 	r := mux.NewRouter()
-	r.HandleFunc("/", Function).Methods("GET")
+	r.HandleFunc("/", Function)
 
 	log.Fatal(http.ListenAndServe(":80", r))
 }

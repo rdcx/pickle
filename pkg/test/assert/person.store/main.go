@@ -9,7 +9,14 @@ import (
 	"github.com/gorilla/mux"
 
 	"github.com/go-redis/redis/v9"
+	"github.com/google/uuid"
 )
+
+type Person struct {
+	ID string `json:"id"`
+
+	Name string `json:"Name"`
+}
 
 var ctx = context.Background()
 var rdb = redis.NewClient(&redis.Options{
@@ -20,14 +27,15 @@ var rdb = redis.NewClient(&redis.Options{
 
 func Function(w http.ResponseWriter, r *http.Request) {
 
-	val, err := rdb.Get(ctx, r.URL.Query().Get("id")).Result()
-	if err == redis.Nil {
-		w.WriteHeader(http.StatusNotFound)
-	} else if err != nil {
-		log.Fatal(err)
-	} else {
-		json.NewEncoder(w).Encode(val)
+	var person Person
+	json.NewDecoder(r.Body).Decode(&person)
+
+	person.ID = uuid.NewString()
+	err := rdb.Set(ctx, person.ID, person, 0).Err()
+	if err != nil {
+		panic(err)
 	}
+	json.NewEncoder(w).Encode(person)
 
 }
 

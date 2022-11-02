@@ -8,6 +8,23 @@ import (
 	"testing"
 )
 
+func TestFunctionHasModel(t *testing.T) {
+	f := Function{
+		Model: Model{
+			Fields: []Field{
+				{
+					Name: "Name",
+					Type: "string",
+				},
+			},
+		},
+	}
+
+	if !f.HasModel() {
+		t.Errorf("Function should have a model, got: %v, want: %v.", f.HasModel(), true)
+	}
+}
+
 func TestPickle(t *testing.T) {
 
 	os.RemoveAll("./test/output")
@@ -30,6 +47,8 @@ func TestPickle(t *testing.T) {
 	checkPaths := []string{
 		"greeter",
 		"gateway",
+		"person.show",
+		"person.store",
 	}
 
 	for _, path := range checkPaths {
