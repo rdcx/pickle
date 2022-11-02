@@ -41,7 +41,15 @@ func Function(w http.ResponseWriter, r *http.Request) {
 	} else if err != nil {
 		log.Fatal(err)
 	} else {
-		json.NewEncoder(w).Encode(val)
+		{{ if .HasModel }}
+		var {{ .Model.Name | lower }} {{ .Model.Name }}
+		json.Unmarshal([]byte(val), &{{ .Model.Name | lower }})
+		val, err := json.Marshal(json, &{{ .Model.Name | lower }})
+	
+		w.Write(val)
+		{{ else }}
+		w.Write([]byte(val))
+		{{ end }}
 	}
 	{{ else if and (.HasRedis) (eq .Action "store") }}
 	
