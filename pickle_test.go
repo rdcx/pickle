@@ -2,7 +2,6 @@ package pickle
 
 import (
 	"bytes"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -28,7 +27,50 @@ func TestPickle(t *testing.T) {
 	}
 	Gen(in, out)
 
-	f1, err1 := ioutil.ReadFile("./test/assert/greeter/main.go")
+	checkPaths := []string{
+		"greeter",
+		"gateway",
+	}
+
+	for _, path := range checkPaths {
+		f1, err1 := os.ReadFile("./test/assert/" + path + "/main.go")
+
+		if err1 != nil {
+			log.Fatal(err1)
+		}
+
+		// per comment, better to not read an entire file into memory
+		// this is simply a trivial example.
+		f2, err2 := os.ReadFile("./test/output/" + path + "/main.go")
+
+		if err1 != nil {
+			log.Fatal(err2)
+		}
+
+		if !bytes.Equal(f1, f2) {
+			t.Errorf("Files are not equal, got: %v, want: %v.", f1, f2)
+		}
+
+		f1, err1 = os.ReadFile("./test/assert/" + path + "/go.mod")
+
+		if err1 != nil {
+			log.Fatal(err1)
+		}
+
+		// per comment, better to not read an entire file into memory
+		// this is simply a trivial example.
+		f2, err2 = os.ReadFile("./test/output/" + path + "/go.mod")
+
+		if err1 != nil {
+			log.Fatal(err2)
+		}
+
+		if !bytes.Equal(f1, f2) {
+			t.Errorf("Files are not equal, got: %v, want: %v.", f1, f2)
+		}
+	}
+
+	f1, err1 := os.ReadFile("./test/assert/docker-compose.yaml")
 
 	if err1 != nil {
 		log.Fatal(err1)
@@ -36,7 +78,7 @@ func TestPickle(t *testing.T) {
 
 	// per comment, better to not read an entire file into memory
 	// this is simply a trivial example.
-	f2, err2 := ioutil.ReadFile("./test/output/greeter/main.go")
+	f2, err2 := os.ReadFile("./test/output/docker-compose.yaml")
 
 	if err1 != nil {
 		log.Fatal(err2)
@@ -46,39 +88,4 @@ func TestPickle(t *testing.T) {
 		t.Errorf("Files are not equal, got: %v, want: %v.", f1, f2)
 	}
 
-	f1, err1 = ioutil.ReadFile("./test/assert/greeter/go.mod")
-
-	if err1 != nil {
-		log.Fatal(err1)
-	}
-
-	// per comment, better to not read an entire file into memory
-	// this is simply a trivial example.
-	f2, err2 = ioutil.ReadFile("./test/output/greeter/go.mod")
-
-	if err1 != nil {
-		log.Fatal(err2)
-	}
-
-	if !bytes.Equal(f1, f2) {
-		t.Errorf("Files are not equal, got: %v, want: %v.", f1, f2)
-	}
-
-	f1, err1 = ioutil.ReadFile("./test/assert/docker-compose.yaml")
-
-	if err1 != nil {
-		log.Fatal(err1)
-	}
-
-	// per comment, better to not read an entire file into memory
-	// this is simply a trivial example.
-	f2, err2 = ioutil.ReadFile("./test/output/docker-compose.yaml")
-
-	if err1 != nil {
-		log.Fatal(err2)
-	}
-
-	if !bytes.Equal(f1, f2) {
-		t.Errorf("Files are not equal, got: %v, want: %v.", f1, f2)
-	}
 }
