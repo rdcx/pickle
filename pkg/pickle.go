@@ -3,11 +3,11 @@ package pickle
 import (
 	"bufio"
 	"bytes"
+	_ "embed"
 	"fmt"
 	"go/format"
 	"log"
 	"os"
-	"path"
 	"strings"
 	"text/template"
 
@@ -33,13 +33,11 @@ type Config struct {
 	Functions []Function
 }
 
-func compileTemplate(templateName, outputFile, out string, function Function) error {
-	name := path.Base(templateName)
-
-	tmpl := template.Must(template.New(name).Funcs(sprig.FuncMap()).ParseFiles(templateName))
+func compileTemplate(t, outputFile, out string, function Function) error {
+	tmpl := template.Must(template.New("template").Funcs(sprig.FuncMap()).Parse(t))
 
 	var processed bytes.Buffer
-	err := tmpl.ExecuteTemplate(&processed, name, function)
+	err := tmpl.ExecuteTemplate(&processed, "template", function)
 	if err != nil {
 		log.Fatalf("Unable to parse data into template: %v\n", err)
 	}
@@ -68,8 +66,11 @@ func compileTest(function Function, out string) error {
 
 	if function.HasTest() {
 		outputFile := out + "/" + function.Name + "/main_test.go"
-		templateName := "./templates/" + function.Type + "/main_test.go.template"
-		return compileTemplate(templateName, outputFile, out, function)
+		tem := ""
+		if function.Type == "mux" {
+			tem = templateMuxMainTest
+		}
+		return compileTemplate(tem, outputFile, out, function)
 	}
 
 	return nil
@@ -78,45 +79,57 @@ func compileTest(function Function, out string) error {
 func compileMain(function Function, out string) error {
 
 	outputFile := out + "/" + function.Name + "/main.go"
-	templateName := "./templates/" + function.Type + "/main.go.template"
-	return compileTemplate(templateName, outputFile, out, function)
+	tem := templateMuxMain
+	if function.Type == "gateway" {
+		tem = templateGatewayMain
+	}
+	return compileTemplate(tem, outputFile, out, function)
 }
 
 func compileGoModFile(function Function, out string) error {
 
 	outputFile := out + "/" + function.Name + "/go.mod"
-	templateName := "./templates/" + function.Type + "/go.mod.template"
+	tem := templateMuxGoMod
+	if function.Type == "gateway" {
+		tem = templateGatewayGoMod
+	}
 
-	return compileTemplate(templateName, outputFile, out, function)
+	return compileTemplate(tem, outputFile, out, function)
 }
 
 func compileGoSumFile(function Function, out string) error {
 
 	outputFile := out + "/" + function.Name + "/go.sum"
-	templateName := "./templates/" + function.Type + "/go.sum.template"
+	tem := templateMuxGoSum
+	if function.Type == "gateway" {
+		tem = templateGatewayGoSum
+	}
 
-	return compileTemplate(templateName, outputFile, out, function)
+	return compileTemplate(tem, outputFile, out, function)
 }
 
 func compileDockerfile(function Function, out string) error {
 
 	outputFile := out + "/" + function.Name + "/Dockerfile"
-	templateName := "./templates/" + function.Type + "/Dockerfile.template"
+	tem := templateMuxDockerfile
+	if function.Type == "gateway" {
+		tem = templateGatewayDockerfile
+	}
 
-	return compileTemplate(templateName, outputFile, out, function)
+	return compileTemplate(tem, outputFile, out, function)
 }
 
 func compileDockerCompose(functions []Function, out string) error {
 
 	outputFile := out + "/docker-compose.yaml"
-	templateName := "./templates/docker-compose.yaml.template"
-
-	name := path.Base(templateName)
-
-	tmpl := template.Must(template.New(name).Funcs(sprig.FuncMap()).ParseFiles(templateName))
+	tmpl := template.Must(
+		template.New("template").
+			Funcs(sprig.FuncMap()).
+			Parse(templateDockerComposeYaml),
+	)
 
 	var processed bytes.Buffer
-	err := tmpl.ExecuteTemplate(&processed, name, functions)
+	err := tmpl.ExecuteTemplate(&processed, "template", functions)
 	if err != nil {
 		log.Fatalf("Unable to parse data into template: %v\n", err)
 	}

@@ -1,5 +1,30 @@
 [[Functions]]
-Name = "greeter"
+Name = "person"
+Method = "GET"
+Type = "mux"
+
+[[Functions]]
+Name = "house"
+Method = "GET"
+Type = "mux"
+
+[[Functions]]
+Name = "car"
+Method = "GET"
+Type = "mux"
+
+[[Functions]]
+Name = "sock"
+Method = "GET"
+Type = "mux"
+
+[[Functions]]
+Name = "computer"
+Method = "GET"
+Type = "mux"
+
+[[Functions]]
+Name = "fridge"
 Method = "GET"
 Type = "mux"
 
