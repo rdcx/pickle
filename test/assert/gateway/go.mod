@@ -1,4 +1,4 @@
-module main
+module gateway
 
 go 1.19
 

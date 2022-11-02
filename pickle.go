@@ -64,7 +64,7 @@ func compileTest(function Function, out string) error {
 
 	if function.HasTest() {
 		outputFile := out + "/" + function.Name + "/main_test.go"
-		templateName := "./templates/mux/main_test.go.tmpl"
+		templateName := "./templates/" + function.Type + "/main_test.go.tmpl"
 		return compileTemplate(templateName, outputFile, out, function)
 	}
 
@@ -74,14 +74,14 @@ func compileTest(function Function, out string) error {
 func compileMain(function Function, out string) error {
 
 	outputFile := out + "/" + function.Name + "/main.go"
-	templateName := "./templates/mux/main.go.tmpl"
+	templateName := "./templates/" + function.Type + "/main.go.tmpl"
 	return compileTemplate(templateName, outputFile, out, function)
 }
 
 func compileGoModFile(function Function, out string) error {
 
 	outputFile := out + "/" + function.Name + "/go.mod"
-	templateName := "./templates/mux/go.mod.tmpl"
+	templateName := "./templates/" + function.Type + "/go.mod.tmpl"
 
 	return compileTemplate(templateName, outputFile, out, function)
 }
@@ -89,7 +89,7 @@ func compileGoModFile(function Function, out string) error {
 func compileDockerfile(function Function, out string) error {
 
 	outputFile := out + "/" + function.Name + "/Dockefile"
-	templateName := "./templates/mux/Dockerfile.tmpl"
+	templateName := "./templates/" + function.Type + "/Dockerfile.tmpl"
 
 	return compileTemplate(templateName, outputFile, out, function)
 }
