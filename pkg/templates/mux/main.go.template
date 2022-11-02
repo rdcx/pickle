@@ -17,7 +17,7 @@ import (
 type {{ .Model.Name }} struct {
 	ID string `json:"id"`
 	{{ range .Model.Fields }}
-	{{ .Name }} {{ .Type }} `json:"{{ .Name }}"`{{ end }}
+	{{ .Name }} {{ .Type }} `json:"{{ .Name | lower }}"`{{ end }}
 }
 
 {{ end }}
@@ -27,7 +27,7 @@ var ctx = context.Background()
 var rdb = redis.NewClient(&redis.Options{
 	Addr:     "{{ .Redis.Host }}:{{ .Redis.Port }}",
 	Password: "{{ .Redis.Password }}", // no password set
-	DB:       0,  // use default DB
+	DB:       {{ .Redis.DB }},  // use default DB
 })
 
 {{ end }}
@@ -51,7 +51,12 @@ func Function(w http.ResponseWriter, r *http.Request) {
 
 	{{ if .HasModel }}
 	{{ .Model.Name | lower }}.ID = uuid.NewString()
-	err := rdb.Set(ctx, {{ .Model.Name | lower }}.ID,{{ .Model.Name | lower }}, 0).Err()
+	jsonStore, err := json.Marshal({{ .Model.Name | lower }})
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+	err = rdb.Set(ctx, {{ .Model.Name | lower }}.ID, jsonStore, 0).Err()
     if err != nil {
         panic(err)
     }

@@ -15,7 +15,7 @@ import (
 type Person struct {
 	ID string `json:"id"`
 
-	Name string `json:"Name"`
+	Name string `json:"name"`
 }
 
 var ctx = context.Background()
@@ -31,7 +31,12 @@ func Function(w http.ResponseWriter, r *http.Request) {
 	json.NewDecoder(r.Body).Decode(&person)
 
 	person.ID = uuid.NewString()
-	err := rdb.Set(ctx, person.ID, person, 0).Err()
+	jsonStore, err := json.Marshal(person)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+	err = rdb.Set(ctx, person.ID, jsonStore, 0).Err()
 	if err != nil {
 		panic(err)
 	}
