@@ -15,10 +15,41 @@ import (
 	"github.com/Masterminds/sprig"
 )
 
+type Field struct {
+	Name string
+	Type string
+}
+
+type Model struct {
+	Fields []Field
+}
+
+type Redis struct {
+	Host     string
+	Port     string
+	DB       string
+	Password string
+}
+
+type Service struct {
+	Name  string
+	Image string
+}
+
 type Function struct {
 	Name   string
 	Type   string
-	Method string
+	Action string
+	Model  Model
+	Redis  Redis
+}
+
+func (f Function) HasModel() bool {
+	return f.Model.Fields != nil
+}
+
+func (f Function) HasRedis() bool {
+	return f.Redis.Host != ""
 }
 
 func (f Function) IsGateway() bool {
@@ -30,6 +61,7 @@ func (f Function) HasTest() bool {
 }
 
 type Config struct {
+	Services  []Service
 	Functions []Function
 }
 
@@ -97,17 +129,6 @@ func compileGoModFile(function Function, out string) error {
 	return compileTemplate(tem, outputFile, out, function)
 }
 
-func compileGoSumFile(function Function, out string) error {
-
-	outputFile := out + "/" + function.Name + "/go.sum"
-	tem := templateMuxGoSum
-	if function.Type == "gateway" {
-		tem = templateGatewayGoSum
-	}
-
-	return compileTemplate(tem, outputFile, out, function)
-}
-
 func compileDockerfile(function Function, out string) error {
 
 	outputFile := out + "/" + function.Name + "/Dockerfile"
@@ -119,7 +140,7 @@ func compileDockerfile(function Function, out string) error {
 	return compileTemplate(tem, outputFile, out, function)
 }
 
-func compileDockerCompose(functions []Function, out string) error {
+func compileDockerCompose(config Config, out string) error {
 
 	outputFile := out + "/docker-compose.yaml"
 	tmpl := template.Must(
@@ -129,7 +150,7 @@ func compileDockerCompose(functions []Function, out string) error {
 	)
 
 	var processed bytes.Buffer
-	err := tmpl.ExecuteTemplate(&processed, "template", functions)
+	err := tmpl.ExecuteTemplate(&processed, "template", config)
 	if err != nil {
 		log.Fatalf("Unable to parse data into template: %v\n", err)
 	}
@@ -164,12 +185,11 @@ func Gen(in string, out string) error {
 	for _, f := range conf.Functions {
 		compileDockerfile(f, out)
 		compileGoModFile(f, out)
-		compileGoSumFile(f, out)
 		compileMain(f, out)
 		compileTest(f, out)
 	}
 
-	compileDockerCompose(conf.Functions, out)
+	compileDockerCompose(conf, out)
 
 	return nil
 

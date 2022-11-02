@@ -1,7 +1,25 @@
+
+[[Services]]
+Name = "redis"
+Port = 6379
+
+
 [[Functions]]
 Name = "greeter"
 Method = "GET"
 Type = "mux"
+
+[[Functions]]
+Name = "person-redis-show"
+Action = "show"
+Method = "GET"
+Type = "mux"
+    
+    [Functions.Redis]
+    host = "localhost"
+    port = "6379"
+    db = "0"
+    password = ""
 
 [[Functions]]
 Name = "gateway"
