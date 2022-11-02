@@ -28,7 +28,7 @@ type Model struct {
 type Redis struct {
 	Host     string
 	Port     string
-	DB       string
+	DB       int
 	Password string
 }
 

@@ -19,7 +19,25 @@ Type = "mux"
     [Functions.Redis]
     host = "redis"
     port = "6379"
-    db = "0"
+    db = 0
+    password = ""
+
+[[Functions]]
+Name = "person.store"
+Action = "store"
+Method = "GET"
+Type = "mux"
+
+    [Functions.Model]
+    Name = "Person"
+        [[Functions.Model.Fields]]
+        Name = "Name"
+        Type = "string"
+    
+    [Functions.Redis]
+    host = "redis"
+    port = "6379"
+    db = 0
     password = ""
 
 [[Functions]]
