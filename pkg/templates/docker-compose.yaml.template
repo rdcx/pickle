@@ -4,6 +4,12 @@ services:
 {{- range $val := .Functions}}
   {{$val.Name}}:
     build: ./{{$val.Name}}
+    {{ if $val.HasRedis -}}
+    depends_on:
+    {{ if $val.HasRedis -}}
+      - redis
+    {{- end }}
+    {{ end -}}
     {{ if $val.IsGateway -}}
     ports:
       - "8080:80"
@@ -11,5 +17,5 @@ services:
 {{end -}}
 {{- range $val := .Services}}
   {{$val.Name}}:
-    image: "{{$val.Name}}"
+    image: "{{$val.Image}}"
 {{end -}}

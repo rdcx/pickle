@@ -5,10 +5,12 @@ services:
     
   person.show:
     build: ./person.show
+    depends_on:
+    - redis
     
   gateway:
     build: ./gateway
     ports:
       - "8080:80"
   redis:
-    image: "redis"
+    image: "redis:7-alpine"

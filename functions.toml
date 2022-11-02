@@ -1,37 +1,26 @@
-[[Functions]]
-Name = "person.store"
-Method = "POST"
-Type = "mux"
-ActionType = "store"
-Redis = true
 
-    [Functions.Model]
-        [[Functions.Model.Fields]]
-        Key = "name"
-        Type = "string"
-        [[Functions.Model.Fields]]
-        Key = "age"
-        Type = "int"
+[[Services]]
+Name = "redis"
+Image = "redis:7-alpine"
+Port = 6379
+
 
 [[Functions]]
-Name = "person.update"
-Method = "POST"
-Type = "mux"
-
-[[Functions]]
-Name = "person.destroy"
-Method = "POST"
-Type = "mux"
-
-[[Functions]]
-Name = "person.index"
+Name = "greeter"
 Method = "GET"
 Type = "mux"
 
 [[Functions]]
 Name = "person.show"
+Action = "show"
 Method = "GET"
 Type = "mux"
+    
+    [Functions.Redis]
+    host = "redis"
+    port = "6379"
+    db = "0"
+    password = ""
 
 [[Functions]]
 Name = "gateway"
