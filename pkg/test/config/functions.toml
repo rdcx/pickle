@@ -1,6 +1,7 @@
 
 [[Services]]
 Name = "redis"
+Image = "redis:7-alpine"
 Port = 6379
 
 
@@ -10,7 +11,7 @@ Method = "GET"
 Type = "mux"
 
 [[Functions]]
-Name = "person-redis-show"
+Name = "person.show"
 Action = "show"
 Method = "GET"
 Type = "mux"

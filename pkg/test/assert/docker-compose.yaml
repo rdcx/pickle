@@ -3,7 +3,12 @@ services:
   greeter:
     build: ./greeter
     
+  person.show:
+    build: ./person.show
+    
   gateway:
     build: ./gateway
     ports:
       - "8080:80"
+  redis:
+    image: "redis"

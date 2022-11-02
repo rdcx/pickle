@@ -11,6 +11,7 @@ import (
 func Function(w http.ResponseWriter, r *http.Request) {
 
 	json.NewEncoder(w).Encode("Hello world")
+
 }
 
 func main() {
