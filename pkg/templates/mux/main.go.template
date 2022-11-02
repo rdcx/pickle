@@ -8,7 +8,7 @@ import (
 
 	"github.com/gorilla/mux"
 
-	{{ if .HasModel }}"github.com/google/uuid"{{ end }}
+	{{ if and .HasModel (eq .Action "store") }}"github.com/google/uuid"{{ end }}
 	{{ if .HasRedis }}"github.com/go-redis/redis/v9"{{ end }}
 )
 
@@ -44,9 +44,7 @@ func Function(w http.ResponseWriter, r *http.Request) {
 		{{ if .HasModel }}
 		var {{ .Model.Name | lower }} {{ .Model.Name }}
 		json.Unmarshal([]byte(val), &{{ .Model.Name | lower }})
-		val, err := json.Marshal(json, &{{ .Model.Name | lower }})
-	
-		w.Write(val)
+		json.NewEncoder(w).Encode({{ .Model.Name | lower }})
 		{{ else }}
 		json.NewEncoder(w).Encode(val)
 		{{ end }}

@@ -16,6 +16,12 @@ Action = "show"
 Method = "GET"
 Type = "mux"
     
+    [Functions.Model]
+    Name = "Person"
+        [[Functions.Model.Fields]]
+        Name = "Name"
+        Type = "string"
+
     [Functions.Redis]
     host = "redis"
     port = "6379"
