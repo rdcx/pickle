@@ -1,0 +1,8 @@
+[[Functions]]
+Name = "greeter"
+Method = "GET"
+Type = "mux"
+
+[[Functions]]
+Name = "gateway"
+Type = "gateway"
