@@ -1,0 +1,11 @@
+{{- /* Go Template */ -}}
+version: "3.9"
+services:
+{{- range $val := .}}
+  {{$val.Name}}:
+    build: ./{{$val.Name}}
+    {{ if $val.IsGateway -}}
+    ports:
+      - "8080:80"
+    {{- end -}}
+{{end -}}

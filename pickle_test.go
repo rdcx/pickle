@@ -47,6 +47,20 @@ func TestPickle(t *testing.T) {
 			log.Fatal(err2)
 		}
 
+		f1, err1 = os.ReadFile("./test/assert/" + path + "/Dockerfile")
+
+		if err1 != nil {
+			log.Fatal(err1)
+		}
+
+		// per comment, better to not read an entire file into memory
+		// this is simply a trivial example.
+		f2, err2 = os.ReadFile("./test/output/" + path + "/Dockerfile")
+
+		if err1 != nil {
+			log.Fatal(err2)
+		}
+
 		if !bytes.Equal(f1, f2) {
 			t.Errorf("Files are not equal, got: %v, want: %v.", f1, f2)
 		}
@@ -60,6 +74,20 @@ func TestPickle(t *testing.T) {
 		// per comment, better to not read an entire file into memory
 		// this is simply a trivial example.
 		f2, err2 = os.ReadFile("./test/output/" + path + "/go.mod")
+
+		if err1 != nil {
+			log.Fatal(err2)
+		}
+
+		f1, err1 = os.ReadFile("./test/assert/" + path + "/go.sum")
+
+		if err1 != nil {
+			log.Fatal(err1)
+		}
+
+		// per comment, better to not read an entire file into memory
+		// this is simply a trivial example.
+		f2, err2 = os.ReadFile("./test/output/" + path + "/go.sum")
 
 		if err1 != nil {
 			log.Fatal(err2)

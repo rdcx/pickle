@@ -21,6 +21,10 @@ type Function struct {
 	Method string
 }
 
+func (f Function) IsGateway() bool {
+	return f.Type == "gateway"
+}
+
 func (f Function) HasTest() bool {
 	return f.Type == "mux"
 }
@@ -64,7 +68,7 @@ func compileTest(function Function, out string) error {
 
 	if function.HasTest() {
 		outputFile := out + "/" + function.Name + "/main_test.go"
-		templateName := "./templates/" + function.Type + "/main_test.go.tmpl"
+		templateName := "./templates/" + function.Type + "/main_test.go.template"
 		return compileTemplate(templateName, outputFile, out, function)
 	}
 
@@ -74,22 +78,30 @@ func compileTest(function Function, out string) error {
 func compileMain(function Function, out string) error {
 
 	outputFile := out + "/" + function.Name + "/main.go"
-	templateName := "./templates/" + function.Type + "/main.go.tmpl"
+	templateName := "./templates/" + function.Type + "/main.go.template"
 	return compileTemplate(templateName, outputFile, out, function)
 }
 
 func compileGoModFile(function Function, out string) error {
 
 	outputFile := out + "/" + function.Name + "/go.mod"
-	templateName := "./templates/" + function.Type + "/go.mod.tmpl"
+	templateName := "./templates/" + function.Type + "/go.mod.template"
+
+	return compileTemplate(templateName, outputFile, out, function)
+}
+
+func compileGoSumFile(function Function, out string) error {
+
+	outputFile := out + "/" + function.Name + "/go.sum"
+	templateName := "./templates/" + function.Type + "/go.sum.template"
 
 	return compileTemplate(templateName, outputFile, out, function)
 }
 
 func compileDockerfile(function Function, out string) error {
 
-	outputFile := out + "/" + function.Name + "/Dockefile"
-	templateName := "./templates/" + function.Type + "/Dockerfile.tmpl"
+	outputFile := out + "/" + function.Name + "/Dockerfile"
+	templateName := "./templates/" + function.Type + "/Dockerfile.template"
 
 	return compileTemplate(templateName, outputFile, out, function)
 }
@@ -97,7 +109,7 @@ func compileDockerfile(function Function, out string) error {
 func compileDockerCompose(functions []Function, out string) error {
 
 	outputFile := out + "/docker-compose.yaml"
-	templateName := "./templates/docker-compose.yaml.tmpl"
+	templateName := "./templates/docker-compose.yaml.template"
 
 	name := path.Base(templateName)
 
@@ -139,6 +151,7 @@ func Gen(in string, out string) error {
 	for _, f := range conf.Functions {
 		compileDockerfile(f, out)
 		compileGoModFile(f, out)
+		compileGoSumFile(f, out)
 		compileMain(f, out)
 		compileTest(f, out)
 	}
