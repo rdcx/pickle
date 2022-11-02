@@ -26,6 +26,7 @@ var rdb = redis.NewClient(&redis.Options{
 })
 
 func Function(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 
 	var person Person
 	json.NewDecoder(r.Body).Decode(&person)

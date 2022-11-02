@@ -33,6 +33,7 @@ var rdb = redis.NewClient(&redis.Options{
 {{ end }}
 
 func Function(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	{{ if and (.HasRedis) (eq .Action "show") }}
 	val, err := rdb.Get(ctx, r.URL.Query().Get("id")).Result()
 	if err == redis.Nil {

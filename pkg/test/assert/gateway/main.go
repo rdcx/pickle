@@ -17,6 +17,8 @@ func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/{function}", func(w http.ResponseWriter, r *http.Request) {
 
+		w.Header().Set("Content-Type", "application/json")
+
 		vars := mux.Vars(r)
 
 		// we need to buffer the body if we want to read it here and send it
