@@ -28,7 +28,7 @@ func Function(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	} else {
 
-		w.Write([]byte(val))
+		json.NewEncoder(w).Encode(val)
 
 	}
 

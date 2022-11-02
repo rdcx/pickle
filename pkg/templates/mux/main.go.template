@@ -48,7 +48,7 @@ func Function(w http.ResponseWriter, r *http.Request) {
 	
 		w.Write(val)
 		{{ else }}
-		w.Write([]byte(val))
+		json.NewEncoder(w).Encode(val)
 		{{ end }}
 	}
 	{{ else if and (.HasRedis) (eq .Action "store") }}
