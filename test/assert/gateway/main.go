@@ -1,0 +1,71 @@
+package main
+
+import (
+	"bytes"
+	"io/ioutil"
+	"log"
+	"net/http"
+	"net/url"
+
+	"github.com/gorilla/mux"
+)
+
+var proxyScheme = "http"
+
+func main() {
+
+	r := mux.NewRouter()
+	r.HandleFunc("/{function}", func(w http.ResponseWriter, r *http.Request) {
+
+		vars := mux.Vars(r)
+
+		// we need to buffer the body if we want to read it here and send it
+		// in the request.
+		body, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		// you can reassign the body if you need to parse it as multipart
+		r.Body = ioutil.NopCloser(bytes.NewReader(body))
+
+		// create a new url from the raw query sent by the client
+		url := url.URL{
+			Scheme:   proxyScheme,
+			Host:     vars["function"],
+			Path:     "/",
+			RawQuery: r.URL.RawQuery,
+		}
+
+		proxyReq, err := http.NewRequest(r.Method, url.String(), bytes.NewReader(body))
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		// We may want to filter some headers, otherwise we could just use a shallow copy
+		// proxyReq.Header = req.Header
+		proxyReq.Header = make(http.Header)
+		for h, val := range r.Header {
+			proxyReq.Header[h] = val
+		}
+
+		client := &http.Client{}
+		resp, err := client.Do(proxyReq)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadGateway)
+			return
+		}
+		defer resp.Body.Close()
+
+		// get resp as []byte
+		respBody, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.Write(respBody)
+	})
+
+	log.Fatal(http.ListenAndServe(":80", r))
+}
