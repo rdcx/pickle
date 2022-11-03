@@ -31,7 +31,7 @@ func Function(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 	} else if err != nil {
 		log.Fatal(err)
-        w.Header(http.StatusInternalServerError)
+        w.WriteHeader(http.StatusInternalServerError)
 	} else {
 		var {{ .Model.Name | lower }} {{ .Model.Name }}
 		json.Unmarshal([]byte(val), &{{ .Model.Name | lower }})

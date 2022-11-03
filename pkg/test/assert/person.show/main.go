@@ -30,7 +30,7 @@ func Function(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 	} else if err != nil {
 		log.Fatal(err)
-		w.Header(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusInternalServerError)
 	} else {
 		var person Person
 		json.Unmarshal([]byte(val), &person)
