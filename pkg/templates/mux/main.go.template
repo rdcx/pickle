@@ -1,86 +1,17 @@
 package main
 
 import (
-	{{ if .HasRedis }}"context"{{ end }}
 	"encoding/json"
 	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
-
-	{{ if and .HasModel (eq .Action "store") }}"github.com/google/uuid"{{ end }}
-	{{ if .HasRedis }}"github.com/go-redis/redis/v9"{{ end }}
 )
-
-{{ if .HasModel }}
-
-type {{ .Model.Name }} struct {
-	ID string `json:"id"`
-	{{ range .Model.Fields }}
-	{{ .Name }} {{ .Type }} `json:"{{ .Name | lower }}"`{{ end }}
-}
-
-{{ end }}
-
-{{ if .HasRedis }}
-var ctx = context.Background()
-var rdb = redis.NewClient(&redis.Options{
-	Addr:     "{{ .Redis.Host }}:{{ .Redis.Port }}",
-	Password: "{{ .Redis.Password }}", // no password set
-	DB:       {{ .Redis.DB }},  // use default DB
-})
-
-{{ end }}
 
 func Function(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	{{ if and (.HasRedis) (eq .Action "show") }}
-	val, err := rdb.Get(ctx, r.URL.Query().Get("id")).Result()
-	if err == redis.Nil {
-		w.WriteHeader(http.StatusNotFound)
-	} else if err != nil {
-		log.Fatal(err)
-	} else {
-		{{ if .HasModel }}
-		var {{ .Model.Name | lower }} {{ .Model.Name }}
-		json.Unmarshal([]byte(val), &{{ .Model.Name | lower }})
-		json.NewEncoder(w).Encode({{ .Model.Name | lower }})
-		{{ else }}
-		json.NewEncoder(w).Encode(val)
-		{{ end }}
-	}
-	{{ else if and (.HasRedis) (eq .Action "store") }}
-	
-	{{ if .HasModel }}
-	var {{ .Model.Name | lower }} {{ .Model.Name }}
-	json.NewDecoder(r.Body).Decode(&{{ .Model.Name | lower }})
-	{{ end }}
-
-	{{ if .HasModel }}
-	{{ .Model.Name | lower }}.ID = uuid.NewString()
-	jsonStore, err := json.Marshal({{ .Model.Name | lower }})
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
-	err = rdb.Set(ctx, {{ .Model.Name | lower }}.ID, jsonStore, 0).Err()
-    if err != nil {
-        panic(err)
-    }
-	json.NewEncoder(w).Encode({{ .Model.Name | lower }})
-	{{ else }}
-	err := rdb.Set(ctx, id, "value", 0).Err()
-    if err != nil {
-        panic(err)
-    }
-	{{ end }}
-
-	
-	{{ else }}
 
 	json.NewEncoder(w).Encode("Hello world")
-
-	{{ end }}
 }
 
 func main() {

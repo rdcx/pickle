@@ -5,23 +5,24 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-
-	"github.com/go-redis/redis/v9"
+    
 	"github.com/gorilla/mux"
+	"github.com/go-redis/redis/v9"
 )
 
-type Person struct {
+type {{ .Model.Name }} struct {
 	ID string `json:"id"`
-
-	Name string `json:"name"`
+	{{ range .Model.Fields }}
+	{{ .Name }} {{ .Type }} `json:"{{ .Name | lower }}"`{{ end }}
 }
 
 var ctx = context.Background()
 var rdb = redis.NewClient(&redis.Options{
-	Addr:     "redis:6379",
-	Password: "", // no password set
-	DB:       0,  // use default DB
+	Addr:     "{{ .Redis.Host }}:{{ .Redis.Port }}",
+	Password: "{{ .Redis.Password }}", // no password set
+	DB:       {{ .Redis.DB }},  // use default DB
 })
+
 
 func Function(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -30,11 +31,11 @@ func Function(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 	} else if err != nil {
 		log.Fatal(err)
-		w.Header(http.StatusInternalServerError)
+        w.Header(http.StatusInternalServerError)
 	} else {
-		var person Person
-		json.Unmarshal([]byte(val), &person)
-		json.NewEncoder(w).Encode(person)
+		var {{ .Model.Name | lower }} {{ .Model.Name }}
+		json.Unmarshal([]byte(val), &{{ .Model.Name | lower }})
+		json.NewEncoder(w).Encode({{ .Model.Name | lower }})
 	}
 }
 

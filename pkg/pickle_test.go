@@ -42,7 +42,12 @@ func TestPickle(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	Gen(in, out)
+	err = Gen(in, out)
+
+	if err != nil {
+		t.Errorf("Expected no errors, got: %v", err)
+		return
+	}
 
 	checkPaths := []string{
 		"greeter",
@@ -67,7 +72,7 @@ func TestPickle(t *testing.T) {
 		}
 
 		if !bytes.Equal(f1, f2) {
-			t.Errorf("Files are not equal for %s, got: \n%v\n, want: \n%v\n.", path, string(f1), string(f2))
+			t.Errorf("Files are not equal for %s, got: \n%v\n, want: \n%v\n.", path, string(f2), string(f1))
 		}
 
 		f1, err1 = os.ReadFile("./test/assert/" + path + "/Dockerfile")
@@ -85,7 +90,7 @@ func TestPickle(t *testing.T) {
 		}
 
 		if !bytes.Equal(f1, f2) {
-			t.Errorf("Files are not equal for %s, got: \n%v\n, want: \n%v\n.", path, string(f1), string(f2))
+			t.Errorf("Files are not equal for %s, got: \n%v\n, want: \n%v\n.", path, string(f2), string(f1))
 		}
 
 		f1, err1 = os.ReadFile("./test/assert/" + path + "/go.mod")
@@ -103,7 +108,7 @@ func TestPickle(t *testing.T) {
 		}
 
 		if !bytes.Equal(f1, f2) {
-			t.Errorf("Files are not equal for %s, got: \n%v\n, want: \n%v\n.", path, string(f1), string(f2))
+			t.Errorf("Files are not equal for %s, got: \n%v\n, want: \n%v\n.", path, string(f2), string(f1))
 		}
 	}
 
@@ -122,7 +127,7 @@ func TestPickle(t *testing.T) {
 	}
 
 	if !bytes.Equal(f1, f2) {
-		t.Errorf("Files are not equal, got: \n%v\n, want: \n%v\n.", string(f1), string(f2))
+		t.Errorf("Files are not equal, got: \n%v\n, want: \n%v\n.", string(f2), string(f1))
 	}
 
 	// os.RemoveAll("./test/output")

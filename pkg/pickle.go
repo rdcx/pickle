@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	_ "embed"
+	"errors"
 	"fmt"
 	"go/format"
 	"log"
@@ -72,14 +73,14 @@ func compileTemplate(t, outputFile, out string, function Function) error {
 	var processed bytes.Buffer
 	err := tmpl.ExecuteTemplate(&processed, "template", function)
 	if err != nil {
-		log.Fatalf("Unable to parse data into template: %v\n", err)
+		return fmt.Errorf("unable to parse data into template: %v", err)
 	}
 
 	contents := processed.Bytes()
 	if strings.HasSuffix(outputFile, ".go") {
 		contents, err = format.Source(contents)
 		if err != nil {
-			log.Fatalf("Could not format processed template: %v\n", err)
+			return fmt.Errorf("could not format processed template: %v", err)
 		}
 	}
 
@@ -109,13 +110,33 @@ func compileTest(function Function, out string) error {
 	return nil
 }
 
+func getMainTemplate(function Function) string {
+	if function.Type == "gateway" {
+		return templateGatewayMain
+	}
+
+	if function.Type == "mux" && function.HasRedis() {
+
+		if function.Action == "show" {
+			return templateRedisMainShow
+		}
+
+		if function.Action == "store" {
+			return templateRedisMainStore
+		}
+
+		return templateRedisMainShow
+	}
+
+	return templateMuxMain
+
+}
+
 func compileMain(function Function, out string) error {
 
 	outputFile := out + "/" + function.Name + "/main.go"
-	tem := templateMuxMain
-	if function.Type == "gateway" {
-		tem = templateGatewayMain
-	}
+	tem := getMainTemplate(function)
+
 	return compileTemplate(tem, outputFile, out, function)
 }
 
@@ -168,30 +189,83 @@ func compileDockerCompose(config Config, out string) error {
 	return nil
 }
 
-func Gen(in string, out string) error {
+func compileFiles(conf Config, out string) error {
 
-	content, err := os.ReadFile(in)
+	err := compileDockerCompose(conf, out)
+	if err != nil {
+		return err
+	}
+	for _, function := range conf.Functions {
+		err = compileMain(function, out)
+		if err != nil {
+			return err
+		}
+		err = compileTest(function, out)
+		if err != nil {
+			return err
+		}
+		err = compileGoModFile(function, out)
+		if err != nil {
+			return err
+		}
+		err = compileDockerfile(function, out)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func validateConfig(config Config) *Validator {
+
+	validator := NewValidator()
+
+	for _, function := range config.Functions {
+
+		if function.Type == "gateway" && function.Action != "" {
+			validator.AddError("Gateway functions cannot have an action")
+		}
+
+		// Redis functions must have a model
+		if function.HasRedis() && !function.HasModel() {
+			validator.AddError("Redis functions must have a model")
+		}
+
+		// Model must have a name
+		if function.HasModel() && function.Model.Name == "" {
+			validator.AddError("Model must have a name")
+		}
+
+	}
+
+	return validator
+}
+
+func decodeConfig(configFile string) (Config, error) {
+
+	var config Config
+	if _, err := toml.DecodeFile(configFile, &config); err != nil {
+		return config, err
+	}
+
+	return config, nil
+}
+
+func Gen(confFile string, outPath string) error {
+
+	conf, err := decodeConfig(confFile)
 
 	if err != nil {
 		return err
 	}
 
-	var conf Config
-	_, err = toml.Decode(string(content), &conf)
+	validator := validateConfig(conf)
 
-	if err != nil {
-		log.Fatal(err)
+	if validator.HasErrors() {
+		validator.PrintErrors()
+		return errors.New("invalid config, see above errors")
 	}
 
-	for _, f := range conf.Functions {
-		compileDockerfile(f, out)
-		compileGoModFile(f, out)
-		compileMain(f, out)
-		compileTest(f, out)
-	}
-
-	compileDockerCompose(conf, out)
-
-	return nil
-
+	return compileFiles(conf, outPath)
 }

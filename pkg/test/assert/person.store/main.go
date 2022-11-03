@@ -6,10 +6,9 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/gorilla/mux"
-
 	"github.com/go-redis/redis/v9"
 	"github.com/google/uuid"
+	"github.com/gorilla/mux"
 )
 
 type Person struct {
@@ -42,7 +41,6 @@ func Function(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 	json.NewEncoder(w).Encode(person)
-
 }
 
 func main() {

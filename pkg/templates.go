@@ -17,6 +17,12 @@ var templateMuxMainTest string
 //go:embed templates/mux/main.go.template
 var templateMuxMain string
 
+//go:embed templates/mux/redis/show.main.go.template
+var templateRedisMainShow string
+
+//go:embed templates/mux/redis/store.main.go.template
+var templateRedisMainStore string
+
 //go:embed templates/gateway/Dockerfile.template
 var templateGatewayDockerfile string
 
