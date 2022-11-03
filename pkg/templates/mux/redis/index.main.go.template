@@ -26,7 +26,17 @@ var rdb = redis.NewClient(&redis.Options{
 
 func Function(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	val, err := rdb.Get(ctx, "{{ .Model.Name | lower }}:" + r.URL.Query().Get("id")).Result()
+
+	keys, cursor, err = rdb.Scan(ctx, cursor, "{{ .Model.Name | lower }}:*", 0).Result()
+	if err != nil {
+		panic(err)
+	}
+
+	for _, key := range keys {
+		fmt.Println("key", key)
+	}
+
+	val, err := rdb.Get(ctx, r.URL.Query().Get("id")).Result()
 	if err == redis.Nil {
 		w.WriteHeader(http.StatusNotFound)
 	} else if err != nil {

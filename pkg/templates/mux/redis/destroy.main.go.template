@@ -25,7 +25,7 @@ var rdb = redis.NewClient(&redis.Options{
 
 func Function(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	err := rdb.Del(ctx, r.URL.Query().Get("id")).Err()
+	err := rdb.Del(ctx, "{{ .Model.Name | lower }}:" + r.URL.Query().Get("id")).Err()
     if err != nil {
         w.WriteHeader(http.StatusNotFound)
     }

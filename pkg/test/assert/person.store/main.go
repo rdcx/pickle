@@ -36,7 +36,7 @@ func Function(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 		return
 	}
-	err = rdb.Set(ctx, person.ID, jsonStore, 0).Err()
+	err = rdb.Set(ctx, "person:"+person.ID, jsonStore, 0).Err()
 	if err != nil {
 		panic(err)
 	}
