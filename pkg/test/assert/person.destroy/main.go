@@ -2,12 +2,10 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"log"
 	"net/http"
 
 	"github.com/go-redis/redis/v9"
-	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 )
 
@@ -26,7 +24,7 @@ var rdb = redis.NewClient(&redis.Options{
 
 func Function(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	err = rdb.Del(ctx, r.URL.Query().Get("id")).Err()
+	err := rdb.Del(ctx, r.URL.Query().Get("id")).Err()
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 	}

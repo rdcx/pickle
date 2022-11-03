@@ -4,7 +4,6 @@ Name = "redis"
 Image = "redis:7-alpine"
 Port = 6379
 
-
 [[Functions]]
 Name = "greeter"
 Method = "GET"
@@ -15,13 +14,11 @@ Name = "person.show"
 Action = "show"
 Method = "GET"
 Type = "mux"
-    
     [Functions.Model]
     Name = "Person"
         [[Functions.Model.Fields]]
         Name = "Name"
         Type = "string"
-
     [Functions.Redis]
     host = "redis"
     port = "6379"
@@ -31,7 +28,43 @@ Type = "mux"
 [[Functions]]
 Name = "person.store"
 Action = "store"
-Method = "GET"
+Method = "POST"
+Type = "mux"
+
+    [Functions.Model]
+    Name = "Person"
+        [[Functions.Model.Fields]]
+        Name = "Name"
+        Type = "string"
+    
+    [Functions.Redis]
+    host = "redis"
+    port = "6379"
+    db = 0
+    password = ""
+
+[[Functions]]
+Name = "person.update"
+Action = "update"
+Method = "POST"
+Type = "mux"
+
+    [Functions.Model]
+    Name = "Person"
+        [[Functions.Model.Fields]]
+        Name = "Name"
+        Type = "string"
+    
+    [Functions.Redis]
+    host = "redis"
+    port = "6379"
+    db = 0
+    password = ""
+
+[[Functions]]
+Name = "person.destroy"
+Action = "destroy"
+Method = "POST"
 Type = "mux"
 
     [Functions.Model]
