@@ -125,6 +125,14 @@ func getMainTemplate(function Function) string {
 			return templateRedisMainStore
 		}
 
+		if function.Action == "update" {
+			return templateRedisMainUpdate
+		}
+
+		if function.Action == "destroy" {
+			return templateRedisMainDestroy
+		}
+
 		return templateRedisMainShow
 	}
 

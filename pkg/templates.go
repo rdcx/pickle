@@ -23,6 +23,12 @@ var templateRedisMainShow string
 //go:embed templates/mux/redis/store.main.go.template
 var templateRedisMainStore string
 
+//go:embed templates/mux/redis/update.main.go.template
+var templateRedisMainUpdate string
+
+//go:embed templates/mux/redis/destroy.main.go.template
+var templateRedisMainDestroy string
+
 //go:embed templates/gateway/Dockerfile.template
 var templateGatewayDockerfile string
 

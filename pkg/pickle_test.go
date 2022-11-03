@@ -54,6 +54,8 @@ func TestPickle(t *testing.T) {
 		"gateway",
 		"person.show",
 		"person.store",
+		"person.update",
+		"person.destroy",
 	}
 
 	for _, path := range checkPaths {

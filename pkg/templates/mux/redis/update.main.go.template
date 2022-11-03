@@ -1,0 +1,53 @@
+package main
+
+import (
+	"context"
+	"encoding/json"
+	"log"
+	"net/http"
+	
+	"github.com/gorilla/mux"
+	"github.com/google/uuid"
+	"github.com/go-redis/redis/v9"
+)
+
+type {{ .Model.Name }} struct {
+	ID string `json:"id"`
+	{{ range .Model.Fields }}
+	{{ .Name }} {{ .Type }} `json:"{{ .Name | lower }}"`{{ end }}
+}
+
+var ctx = context.Background()
+var rdb = redis.NewClient(&redis.Options{
+	Addr:     "{{ .Redis.Host }}:{{ .Redis.Port }}",
+	Password: "{{ .Redis.Password }}", // no password set
+	DB:       {{ .Redis.DB }},  // use default DB
+})
+
+
+func Function(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	
+	var {{ .Model.Name | lower }} {{ .Model.Name }}
+	json.NewDecoder(r.Body).Decode(&{{ .Model.Name | lower }})
+	
+	{{ .Model.Name | lower }}.ID = r.URL.Query().Get("id")
+	jsonStore, err := json.Marshal({{ .Model.Name | lower }})
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+	err = rdb.Set(ctx, {{ .Model.Name | lower }}.ID, jsonStore, 0).Err()
+    if err != nil {
+        panic(err)
+    }
+	json.NewEncoder(w).Encode({{ .Model.Name | lower }})
+}
+
+func main() {
+
+	r := mux.NewRouter()
+	r.HandleFunc("/", Function)
+
+	log.Fatal(http.ListenAndServe(":80", r))
+}

@@ -13,6 +13,16 @@ services:
     depends_on:
     - redis
     
+  person.update:
+    build: ./person.update
+    depends_on:
+    - redis
+    
+  person.destroy:
+    build: ./person.destroy
+    depends_on:
+    - redis
+    
   gateway:
     build: ./gateway
     ports:

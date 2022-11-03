@@ -44,5 +44,41 @@ Type = "mux"
     password = ""
 
 [[Functions]]
+Name = "person.update"
+Action = "update"
+Method = "POST"
+Type = "mux"
+
+    [Functions.Model]
+    Name = "Person"
+        [[Functions.Model.Fields]]
+        Name = "Name"
+        Type = "string"
+    
+    [Functions.Redis]
+    host = "redis"
+    port = "6379"
+    db = 0
+    password = ""
+
+[[Functions]]
+Name = "person.destroy"
+Action = "destroy"
+Method = "POST"
+Type = "mux"
+
+    [Functions.Model]
+    Name = "Person"
+        [[Functions.Model.Fields]]
+        Name = "Name"
+        Type = "string"
+    
+    [Functions.Redis]
+    host = "redis"
+    port = "6379"
+    db = 0
+    password = ""
+
+[[Functions]]
 Name = "gateway"
 Type = "gateway"
