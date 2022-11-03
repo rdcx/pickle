@@ -12,10 +12,9 @@ RUN go mod download
 
 RUN go build -o /function
 
-COPY *.go ./
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o function
 
-RUN go build -o /function
+FROM scratch
 
-EXPOSE 80
-
-CMD [ "/function" ]
+COPY --from=0 /app/function .
+CMD ["./function"]
